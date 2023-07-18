@@ -133,11 +133,20 @@ def add_song_to_playlist(playlist_id):
 
     # Restrict form to songs not already on this playlist
 
-    curr_on_playlist = ...
-    form.song.choices = ...
+    curr_on_playlist = [s.id for s in playlist.songs]
+    form.song.choices = (
+        db.session.query(Song.id, Song.title)
+        .filter(~Song.id.in_(curr_on_playlist))
+        .all()
+    )
 
     if form.validate_on_submit():
         # ADD THE NECESSARY CODE HERE FOR THIS ROUTE TO WORK
+
+        song = Song.query.get(form.song.data)
+        playlist.songs.append(song)
+
+        db.session.commit()
 
         return redirect(f"/playlists/{playlist_id}")
 
